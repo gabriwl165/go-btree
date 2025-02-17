@@ -11,7 +11,7 @@ B-Tree has some initials definiitions, such as:
 
 Let's assume the maximum items in node is 4 (four)
 
-![Logarithmic Time Example](assets/examples_insert/image2.png)
+![Logarithmic Time Example](assets/examples_insert/image.png)
 
 
 ## Deleting Node
