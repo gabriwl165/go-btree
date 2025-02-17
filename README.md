@@ -4,7 +4,8 @@ A B-tree is a self-balancing tree data structure that maintains sorted data and 
 
 ![Logarithmic Time Example](assets/logarithmic_time_complexity.jpg)
 
-## Insert Node
+
+### Introduction
 
 B-Tree has some initials definiitions, such as:
 - The minimun amout of items that a node can have is half of the maximum, except for the root node
@@ -28,15 +29,15 @@ const (
 )
 
 type Item struct {
-	key []byte
-	val []byte
+	Key []byte
+	Val []byte
 }
 
 type Node struct {
-	items       [maxItems]*Item
-	children    [maxChildren]*Node
-	numItems    int
-	numChildren int
+	Items       [maxItems]*Item
+	Children    [maxChildren]*Node
+	NumItems    int
+	NumChildren int
 }
 
 type BTree struct {
@@ -50,5 +51,34 @@ type BTree struct {
 
 ![BTree Definition](assets/examples_insert/btree_definition.png)
 
+## Searching Node
+
+Before we dive into how to insert and delete node, there's one step earlier, that is implement how we're going to iterate over the btree.
+
+```go
+func (n *Node) search(key []byte) (int, bool) {
+	low, high := 0, n.NumItems
+	var mid int
+	for low < high {
+		mid = (low + high) / 2
+		cmp := bytes.Compare(key, n.Items[mid].Key)
+		switch {
+		case cmp > 0:
+			low = mid + 1
+		case cmp < 0:
+			high = mid
+		case cmp == 0:
+			return mid, true
+		}
+	}
+	return low, false
+}
+```
+
+This method performs a binary search on a sorted list of items inside a Node. It finds the position of a given key or determines where it should be inserted.
+
+
+
+## Inserting Node
 ## Deleting Node
 
