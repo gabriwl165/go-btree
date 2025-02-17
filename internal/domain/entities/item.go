@@ -1,6 +1,6 @@
 package entities
 
-type item struct {
-	key []byte
-	val []byte
+type Item struct {
+	Key []byte
+	Val []byte
 }

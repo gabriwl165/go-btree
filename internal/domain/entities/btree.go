@@ -1,7 +1,9 @@
 package entities
 
+import "errors"
+
 type BTree struct {
-	root *node
+	root *Node
 }
 
 func (t *BTree) Find(key []byte) ([]byte, error) {
@@ -9,35 +11,36 @@ func (t *BTree) Find(key []byte) ([]byte, error) {
 		pos, found := next.search(key)
 
 		if found {
-			return next.items[pos].val, nil
+			return next.Items[pos].Val, nil
 		}
 
-		next = next.children[pos]
+		next = next.Children[pos]
 	}
 	return nil, errors.New("key not found")
 }
 
 func (t *BTree) splitRoot() {
-	newRoot := &node{}
+	newRoot := &Node{}
 	midItem, newNode := t.root.split()
-	newRoot.insertItemAt(0, midItem)
+	newRoot.InsertItemAt(0, midItem)
 	newRoot.insertChildAt(0, t.root)
 	newRoot.insertChildAt(1, newNode)
 	t.root = newRoot
 }
 
-func (t *BTree) Insert(key, val []byte) {
-	i := &item{key, val}
+func (t *BTree) Insert(Key, Val []byte) bool {
+	i := &Item{Key, Val}
 
 	if t.root == nil {
-		t.root = &node{}
+		t.root = &Node{}
 	}
 
-	if t.root.numItems >= maxItems {
+	if t.root.NumItems >= maxItems {
 		t.splitRoot()
 	}
 
-	t.root.insert(i)
+	hasSuccess := t.root.insert(i)
+	return hasSuccess
 }
 
 func (t *BTree) Delete(key []byte) bool {
@@ -46,11 +49,11 @@ func (t *BTree) Delete(key []byte) bool {
 	}
 	deletedItem := t.root.delete(key, false)
 
-	if t.root.numItems == 0 {
-		if t.root.isLeaf() {
+	if t.root.NumItems == 0 {
+		if t.root.IsLeaf() {
 			t.root = nil
 		} else {
-			t.root = t.root.children[[0]]
+			t.root = t.root.Children[0]
 		}
 	}
 
@@ -59,4 +62,3 @@ func (t *BTree) Delete(key []byte) bool {
 	}
 	return false
 }
-

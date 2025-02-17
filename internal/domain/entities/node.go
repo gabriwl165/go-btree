@@ -3,33 +3,33 @@ package entities
 import "bytes"
 
 const (
-	degree      = 5
+	degree      = 2
 	maxChildren = 2 * degree
 	maxItems    = maxChildren - 1
 	minItems    = degree - 1
 )
 
-type node struct {
-	items       [maxItems]*item
-	children    [maxChildren]*node
-	numItems    int
-	numChildren int
+type Node struct {
+	Items       [maxItems]*Item
+	Children    [maxChildren]*Node
+	NumItems    int
+	NumChildren int
 }
 
-func (n *node) insertItemAt(pos int, i *item) {
-	if pos < n.numItems {
-		copy(n.items[pos+1:n.numItems+1], n.items[pos:n.numItems])
+func (n *Node) InsertItemAt(pos int, i *Item) {
+	if pos < n.NumItems {
+		copy(n.Items[pos+1:n.NumItems+1], n.Items[pos:n.NumItems])
 	}
-	n.items[pos] = i
-	n.numItems++
+	n.Items[pos] = i
+	n.NumItems++
 }
 
-func (n *node) search(key []byte) (int, bool) {
-	low, high := 0, n.numItems
+func (n *Node) search(key []byte) (int, bool) {
+	low, high := 0, n.NumItems
 	var mid int
 	for low < high {
 		mid = (low + high) / 2
-		cmp := bytes.Compare(key, n.items[mid].key)
+		cmp := bytes.Compare(key, n.Items[mid].Key)
 		switch {
 		case cmp > 0:
 			low = mid + 1
@@ -42,146 +42,146 @@ func (n *node) search(key []byte) (int, bool) {
 	return low, false
 }
 
-func (n *node) insertChildAt(pos int, c *node) {
-	if pos < n.numChildren {
-		copy(n.children[pos+1:n.numChildren+1], n.children[:][pos:n.numChildren])
+func (n *Node) insertChildAt(pos int, c *Node) {
+	if pos < n.NumChildren {
+		copy(n.Children[pos+1:n.NumChildren+1], n.Children[:][pos:n.NumChildren])
 	}
-	n.children[pos] = c
-	n.numChildren++
+	n.Children[pos] = c
+	n.NumChildren++
 }
 
-func (n *node) split() (*item, *node) {
+func (n *Node) split() (*Item, *Node) {
 	mid := minItems
-	midItem := n.items[mid]
+	midItem := n.Items[mid]
 
-	newNode := &node{}
-	copy(newNode.items[:], n.items[mid+1:])
-	newNode.numItems = minItems
+	newNode := &Node{}
+	copy(newNode.Items[:], n.Items[mid+1:])
+	newNode.NumItems = minItems
 
-	if !n.isLeaf() {
-		copy(newNode.children[:], n.children[mid+1:])
-		newNode.numChildren = minItems + 1
+	if !n.IsLeaf() {
+		copy(newNode.Children[:], n.Children[mid+1:])
+		newNode.NumChildren = minItems + 1
 	}
 
-	for i, l := mid, n.numItems; i < l; i++ {
-		n.items[i] = nil
-		n.numItems--
+	for i, l := mid, n.NumItems; i < l; i++ {
+		n.Items[i] = nil
+		n.NumItems--
 
-		if !n.isLeaf() {
-			n.children[i+1] = nil
-			n.numChildren--
+		if !n.IsLeaf() {
+			n.Children[i+1] = nil
+			n.NumChildren--
 		}
 	}
 
 	return midItem, newNode
 }
 
-func (n *node) insert(item *item) bool {
-	pos, found := n.search(item.key)
+func (n *Node) insert(item *Item) bool {
+	pos, found := n.search(item.Key)
 	if found {
-		n.items[pos] = item
+		n.Items[pos] = item
 		return false
 	}
 
-	if n.isLeaf() {
-		n.insertItemAt(pos, item)
+	if n.IsLeaf() {
+		n.InsertItemAt(pos, item)
 		return true
 	}
 
-	if n.children[pos].numItems >= maxItems {
-		midItem, newNode := n.children[pos].split()
-		n.insertItemAt(pos, midItem)
+	if n.Children[pos].NumItems >= maxItems {
+		midItem, newNode := n.Children[pos].split()
+		n.InsertItemAt(pos, midItem)
 		n.insertChildAt(pos+1, newNode)
 
-		switch cmp := bytes.Compare(item.key, n.items[pos].key); {
+		switch cmp := bytes.Compare(item.Key, n.Items[pos].Key); {
 		case cmp < 0:
-			// The key we are looking for is still smaller than the key of the middle item that we took from the child,
+			// The key we are looking for is still smaller than the key of the middle Item that we took from the child,
 			// so we can continue following the same direction.
 		case cmp > 0:
 			pos++
 		default:
-			n.items[pos] = item
+			n.Items[pos] = item
 			return true
 		}
 
 	}
-	return n.children[pos].insert(item)
+	return n.Children[pos].insert(item)
 }
 
-func (n *node) removeItemAt(pos int) *item {
-	removedItem := n.items[pos]
-	n.items[pos] = nil
+func (n *Node) removeItemAt(pos int) *Item {
+	removedItem := n.Items[pos]
+	n.Items[pos] = nil
 
-	if lastPos := n.numItems - 1; pos < lastPos {
-		copy(n.items[pos:lastPos], n.items[pos+1:lastPos+1])
-		n.items[lastPos] = nil
+	if lastPos := n.NumItems - 1; pos < lastPos {
+		copy(n.Items[pos:lastPos], n.Items[pos+1:lastPos+1])
+		n.Items[lastPos] = nil
 	}
-	n.numItems--
+	n.NumItems--
 
 	return removedItem
 }
 
-func (n *node) removeChildAt(pos int) *node {
-	removedChild := n.children[pos]
-	n.children[pos] = nil
-	if lastPos := n.numChildren - 1; pos < lastPos {
-		copy(n.children[pos:lastPos], n.children[pos+1:lastPos+1])
-		n.children[lastPos] = nil
+func (n *Node) removeChildAt(pos int) *Node {
+	removedChild := n.Children[pos]
+	n.Children[pos] = nil
+	if lastPos := n.NumChildren - 1; pos < lastPos {
+		copy(n.Children[pos:lastPos], n.Children[pos+1:lastPos+1])
+		n.Children[lastPos] = nil
 	}
-	n.numChildren--
+	n.NumChildren--
 	return removedChild
 }
 
-func (n *node) fillChildAt(pos int) {
+func (n *Node) fillChildAt(pos int) {
 	switch {
-	case pos > 0 && n.children[pos-1].numItems > minItems:
-		left, right := n.children[pos-1], n.children[pos]
-		copy(right.items[1:right.numItems+1], right.items[:right.numItems])
-		right.items[0] = n.items[pos-1]
-		right.numItems++
-		if !right.isLeaf() {
-			right.insertChildAt(0, left.removeChildAt(left.numChildren-1))
+	case pos > 0 && n.Children[pos-1].NumItems > minItems:
+		left, right := n.Children[pos-1], n.Children[pos]
+		copy(right.Items[1:right.NumItems+1], right.Items[:right.NumItems])
+		right.Items[0] = n.Items[pos-1]
+		right.NumItems++
+		if !right.IsLeaf() {
+			right.insertChildAt(0, left.removeChildAt(left.NumChildren-1))
 		}
-		n.items[pos-1] = left.removeItemAt(left.numItems - 1)
-	case pos < n.numChildren-1 && n.children[pos+1].numItems > minItems:
-		left, right := n.children[pos], n.children[pos+1]
-		left.items[left.numItems] = n.items[pos]
-		left.numItems++
-		if !left.isLeaf() {
-			left.insertChildAt(left.numChildren, right.removeChildAt(0))
+		n.Items[pos-1] = left.removeItemAt(left.NumItems - 1)
+	case pos < n.NumChildren-1 && n.Children[pos+1].NumItems > minItems:
+		left, right := n.Children[pos], n.Children[pos+1]
+		left.Items[left.NumItems] = n.Items[pos]
+		left.NumItems++
+		if !left.IsLeaf() {
+			left.insertChildAt(left.NumChildren, right.removeChildAt(0))
 		}
-		n.items[pos] = right.removeItemAt(0)
+		n.Items[pos] = right.removeItemAt(0)
 	default:
-		if pos >= n.numItems {
-			pos = n.numItems - 1
+		if pos >= n.NumItems {
+			pos = n.NumItems - 1
 		}
-		left, right := n.children[pos], n.children[pos+1]
-		left.items[left.numItems] = n.removeItemAt(pos)
-		left.numItems++
-		copy(left.items[left.numItems:], right.items[:right.numItems])
-		left.numItems += right.numItems
-		if !left.isLeaf() {
-			copy(left.children[left.numChildren:], right.children[:right.numChildren])
-			left.numChildren += right.numChildren
+		left, right := n.Children[pos], n.Children[pos+1]
+		left.Items[left.NumItems] = n.removeItemAt(pos)
+		left.NumItems++
+		copy(left.Items[left.NumItems:], right.Items[:right.NumItems])
+		left.NumItems += right.NumItems
+		if !left.IsLeaf() {
+			copy(left.Children[left.NumChildren:], right.Children[:right.NumChildren])
+			left.NumChildren += right.NumChildren
 		}
 		n.removeChildAt(pos + 1)
 		right = nil
 	}
 }
 
-func (n *node) delete(key []byte, isSeekingSuccessor bool) *item {
+func (n *Node) delete(key []byte, isSeekingSuccessor bool) *Item {
 	pos, found := n.search(key)
-	var next *node
+	var next *Node
 	if found {
-		if n.isLeaf() {
+		if n.IsLeaf() {
 			return n.removeItemAt(pos)
 		}
-		next, isSeekingSuccessor = n.children[pos+1], true
+		next, isSeekingSuccessor = n.Children[pos+1], true
 	} else {
-		next = n.children[pos]
+		next = n.Children[pos]
 	}
 
-	if n.isLeaf() && isSeekingSuccessor {
+	if n.IsLeaf() && isSeekingSuccessor {
 		return n.removeItemAt(0)
 	}
 
@@ -192,10 +192,10 @@ func (n *node) delete(key []byte, isSeekingSuccessor bool) *item {
 	deletedItem := next.delete(key, isSeekingSuccessor)
 
 	if found && isSeekingSuccessor {
-		n.items[pos] = deletedItem
+		n.Items[pos] = deletedItem
 	}
 
-	if next.numItems < minItems {
+	if next.NumItems < minItems {
 		if found && isSeekingSuccessor {
 			n.fillChildAt(pos + 1)
 		} else {
@@ -205,6 +205,6 @@ func (n *node) delete(key []byte, isSeekingSuccessor bool) *item {
 	return deletedItem
 }
 
-func (n *node) isLeaf() bool {
-	return n.numChildren == 0
+func (n *Node) IsLeaf() bool {
+	return n.NumChildren == 0
 }
