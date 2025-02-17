@@ -17,5 +17,38 @@ So, what we need to do now, that there's 5 items within this node? We should spl
 
 ![Splitting the root node](assets/examples_insert/image4.png)
 
+So, with this introduction, we should be able to start our code!
+
+```go
+const (
+	degree      = 5
+	maxChildren = 2 * degree
+	maxItems    = maxChildren - 1
+	minItems    = degree - 1
+)
+
+type Item struct {
+	key []byte
+	val []byte
+}
+
+type Node struct {
+	items       [maxItems]*Item
+	children    [maxChildren]*Node
+	numItems    int
+	numChildren int
+}
+
+type BTree struct {
+	root *Node
+}
+```
+
+- Item is our smallest unit of data, it will store whatever you want
+- Node is responsible to store our items
+- BTree is de Data Structure that will arrange all nodes
+
+![BTree Definition](assets/examples_insert/btree_definition.png)
+
 ## Deleting Node
 
