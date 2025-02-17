@@ -11,8 +11,11 @@ B-Tree has some initials definiitions, such as:
 
 Let's assume the maximum items in node is 4 (four)
 
-![Logarithmic Time Example](assets/examples_insert/image3.png)
+![Creating the root node](assets/examples_insert/image3.png)
 
+So, what we need to do now, that there's 5 items within this node? We should split them up! We basically get the mid item, and make him the current root node, all from the left is going to point to him, and the same from the right.
+
+![Splitting the root node](assets/examples_insert/image4.png)
 
 ## Deleting Node
 
