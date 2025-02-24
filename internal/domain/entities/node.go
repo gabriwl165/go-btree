@@ -98,8 +98,11 @@ func (n *Node) insert(item *Item) bool {
 			// The key we are looking for is still smaller than the key of the middle Item that we took from the child,
 			// so we can continue following the same direction.
 		case cmp > 0:
+			// The middle item that we took from the child has a key that is smaller than the one we are looking for,
+			// so we need to change our direction.
 			pos++
 		default:
+			// The middle item that we took from the child is the item we are searching for, so just update its value.
 			n.Items[pos] = item
 			return true
 		}
