@@ -162,6 +162,8 @@ func (n *Node) split() (*Item, *Node) {
 }
 ```
 
+![BTree Definition](assets/btree/image2.png)
+
 - `mid` and `midItem` is getting the mid item within the current node.
 - In `&Node{}` we `copy` half right of the item to inside the new node.
 - If the node is not a leaf it copies the right half of the child pointers to `newNode.Children`
@@ -323,7 +325,6 @@ func (t *BTree) splitRoot() {
 ```
 
 And now, our previous test that have failed should be working now.
-
 
 ## Deleting Node
 
